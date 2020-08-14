@@ -1,1 +1,1 @@
-[appurl]: https://alpinelinux.org
+https://alpinelinux.org
