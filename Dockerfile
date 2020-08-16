@@ -38,8 +38,8 @@ FROM scratch
 COPY --from=rootfs-stage /root-out/ /
 ARG BUILD_DATE
 ARG VERSION
-LABEL build_version="Linuxserver.io version:- ${VERSION} Build-date:- ${BUILD_DATE}"
-LABEL maintainer="TheLamer"
+LABEL build_version="Custom version:- ${VERSION} Build-date:- ${BUILD_DATE}"
+LABEL maintainer="csigabit"
 
 # set version for s6 overlay
 ARG OVERLAY_VERSION="v2.0.0.1"
