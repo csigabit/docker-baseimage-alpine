@@ -13,7 +13,7 @@ xz
 
 # install packages
 RUN \
- apk add --no-cache \
+ apk add --no-cache --allow-untrusted \
 	bash \
 	curl \
 	tzdata \
@@ -52,11 +52,11 @@ TERM="xterm"
 
 RUN \
  echo "**** install build packages ****" && \
- apk add --no-cache --virtual=build-dependencies \
+ apk add --no-cache --allow-untrusted --virtual=build-dependencies \
 	curl \
 	tar && \
  echo "**** install runtime packages ****" && \
- apk add --no-cache \
+ apk add --no-cache --allow-untrusted \
 	bash \
 	ca-certificates \
 	coreutils \
