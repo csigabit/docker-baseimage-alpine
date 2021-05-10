@@ -1,7 +1,7 @@
-FROM alpine:3.10 as rootfs-stage
+FROM alpine:3.12 as rootfs-stage
 
 # environment
-ENV REL=v3.12
+ENV REL=v3.13
 ENV ARCH=x86_64
 ENV MIRROR=http://dl-cdn.alpinelinux.org/alpine
 ENV PACKAGES=alpine-baselayout,\
@@ -38,12 +38,17 @@ FROM scratch
 COPY --from=rootfs-stage /root-out/ /
 ARG BUILD_DATE
 ARG VERSION
-LABEL build_version="Linuxserver.io version:- ${VERSION} Build-date:- ${BUILD_DATE}"
-LABEL maintainer="TheLamer"
+LABEL build_version="csigabit version:- ${VERSION} Build-date:- ${BUILD_DATE}"
+LABEL maintainer="csigabit"
 
 # set version for s6 overlay
-ARG OVERLAY_VERSION="v2.0.0.1"
+ARG OVERLAY_VERSION="v2.2.0.3"
 ARG OVERLAY_ARCH="amd64"
+
+# add s6 overlay
+ADD https://github.com/just-containers/s6-overlay/releases/download/${OVERLAY_VERSION}/s6-overlay-${OVERLAY_ARCH}-installer /tmp/
+RUN chmod +x /tmp/s6-overlay-${OVERLAY_ARCH}-installer && /tmp/s6-overlay-${OVERLAY_ARCH}-installer / && rm /tmp/s6-overlay-${OVERLAY_ARCH}-installer
+COPY patch/ /tmp/patch
 
 # environment variables
 ENV PS1="$(whoami)@$(hostname):$(pwd)\\$ " \
@@ -54,6 +59,7 @@ RUN \
  echo "**** install build packages ****" && \
  apk add --no-cache --virtual=build-dependencies \
 	curl \
+	patch \
 	tar && \
  echo "**** install runtime packages ****" && \
  apk add --no-cache \
@@ -63,12 +69,6 @@ RUN \
 	procps \
 	shadow \
 	tzdata && \
- echo "**** add s6 overlay ****" && \
- curl -o \
- /tmp/s6-overlay.tar.gz -L \
-	"https://github.com/just-containers/s6-overlay/releases/download/${OVERLAY_VERSION}/s6-overlay-${OVERLAY_ARCH}.tar.gz" && \
- tar xfz \
-	/tmp/s6-overlay.tar.gz -C / && \
  echo "**** create abc user and make our folders ****" && \
  groupmod -g 1000 users && \
  useradd -u 911 -U -d /config -s /bin/false abc && \
@@ -78,6 +78,7 @@ RUN \
 	/config \
 	/defaults && \
  mv /usr/bin/with-contenv /usr/bin/with-contenvb && \
+ patch -u /etc/s6/init/init-stage2 -i /tmp/patch/etc/s6/init/init-stage2.patch && \
  echo "**** cleanup ****" && \
  apk del --purge \
 	build-dependencies && \
